@@ -30,6 +30,18 @@ Production-Ready Core: Migrated from a prototyping layout (Streamlit) to a scala
 
 
 
+📸 Screenshots
+
+
+
+1\. Initial State (No Resumes Loaded)
+
+
+
+2\. Multi-Candidate Match \& Rank Analysis
+
+
+
 🧠 System Architecture \& Algorithms
 
 
@@ -38,31 +50,31 @@ To rank and filter candidates objectively, the system evaluates documents from t
 
 
 
-\[Uploaded Resumes] ──> \[pypdf Parsing] ──> \[Text Normalization] 
+graph TD
 
-&#x20;                                                   │
+&#x20;   A\[Uploaded Resumes] --> B\[pypdf Parsing]
 
-&#x20;                  ┌────────────────────────────────┴────────────────────────────────┐
+&#x20;   B --> C\[Text Normalization]
 
-&#x20;                  ▼                                                                 ▼
+&#x20;   C --> D\[SBERT Model<br/>Contextual \& Semantic Embeddings]
 
-&#x20;        \[SBERT (Transformer)]                                               \[Doc2Vec Model]
+&#x20;   C --> E\[Doc2Vec Model<br/>Thematic Paragraph Profiles]
 
-&#x20; Contextual \& Semantic Embeddings                                    Paragraph-level Co-occurrences
+&#x20;   D --> F\[Cosine Similarity]
 
-&#x20;                  │                                                                 │
+&#x20;   E --> F
 
-&#x20;                  └────────────────────────────────┬────────────────────────────────┘
+&#x20;   F --> G\[Combined Match \& Rank Output]
 
-&#x20;                                                   ▼
 
-&#x20;                                         \[Cosine Similarity]
 
-&#x20;                                                   │
+&#x20;   style A fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff
 
-&#x20;                                                   ▼
+&#x20;   style D fill:#1e293b,stroke:#475569,stroke-width:1px,color:#fff
 
-&#x20;                                  \[Combined Match \& Rank Output]
+&#x20;   style E fill:#1e293b,stroke:#475569,stroke-width:1px,color:#fff
+
+&#x20;   style G fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff
 
 
 
@@ -160,6 +172,8 @@ cd ai-resume-screener
 
 
 
+
+
 2\. Install PyTorch (CPU Version)
 
 
@@ -169,6 +183,8 @@ Installing the lightweight CPU build of PyTorch keeps the installation fast and 
 
 
 pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
+
+
 
 
 
@@ -184,11 +200,15 @@ pip install -r requirements.txt
 
 
 
+
+
 4\. Run the Flask Server
 
 
 
 python app.py
+
+
 
 
 
