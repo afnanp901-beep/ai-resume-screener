@@ -3,6 +3,7 @@ import re
 import numpy as np
 from flask import Flask, render_template, request
 from pypdf import PdfReader
+from langsmith import traceable
 
 try:
     from sentence_transformers import SentenceTransformer, util
@@ -38,6 +39,7 @@ def extract_text_from_pdf(file_stream):
         print(f"Error reading PDF text: {e}")
         return ""
 
+@traceable(name="doc2vec_scoring")
 def calculate_doc2vec_similarities(jd_text, resume_texts):
     """
     Trains an optimized Doc2Vec model in PV-DBOW mode for small corpora,
@@ -114,6 +116,7 @@ def home():
     return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
+@traceable(name="resume_screening_request")
 def predict():
     jd_text = request.form.get('job_description', '').strip()
     uploaded_files = request.files.getlist('resumes')
@@ -168,9 +171,9 @@ def predict():
         matched, missing = analyze_keyword_overlap(jd_text, raw_resumes[i])
         
         # Categorize base fit level
-        if avg_score >= 80:
+        if avg_score >= 65:
             status = "Strong Match"
-        elif avg_score >= 50:
+        elif avg_score >= 40:
             status = "Moderate Match"
         else:
             status = "Low Match"

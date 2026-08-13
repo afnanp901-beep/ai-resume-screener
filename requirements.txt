@@ -4,3 +4,6 @@ sentence-transformers
 gensim 
 pypdf 
 numpy 
+scikit-learn
+langsmith
+pandas
