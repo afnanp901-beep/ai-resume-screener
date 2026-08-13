@@ -1,10 +1,11 @@
-flask 
-gunicorn 
-sentence-transformers 
-gensim 
-pypdf 
-numpy 
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.1.0+cpu
+flask
+gunicorn
+sentence-transformers
+gensim
+pypdf
+numpy
 scikit-learn
 langsmith
 pandas
-gunicorn
