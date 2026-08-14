@@ -144,7 +144,7 @@ def predict():
     if not raw_resumes:
         return "Could not extract text from any of the uploaded files. Please check your PDF formats.", 400
 
-sbert_scores = []
+    sbert_scores = []
     doc2vec_scores = []
 
     # 2. Compute Dual Model Similarity Arrays
@@ -152,7 +152,8 @@ sbert_scores = []
     if ML_LIBRARIES_AVAILABLE and active_sbert_model is not None:
         # SBERT Contextual Semantic Match
         jd_embedding = active_sbert_model.encode(jd_text, convert_to_tensor=True)
-        resume_embeddings = active_sbert_model.encode(raw_resumes, convert_to_tensor=True)
+        resume_embeddings = active_sbert_model.encode(raw_resumes,
+convert_to_tensor=True)
         
         cosine_results = util.cos_sim(jd_embedding, resume_embeddings)[0]
         for score in cosine_results:
