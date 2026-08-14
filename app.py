@@ -4,6 +4,8 @@ import numpy as np
 from flask import Flask, render_template, request
 from pypdf import PdfReader
 from langsmith import traceable
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["HF_HUB_OFFLINE"] = "0"  # keep this False for the first deploy so it can download
 
 try:
     from sentence_transformers import SentenceTransformer, util
@@ -14,13 +16,15 @@ except ImportError:
 
 app = Flask(__name__)
 
-if ML_LIBRARIES_AVAILABLE:
-    print("Loading SBERT Semantic Transformer model...")
-    # Using the lightweight contextual model
-    sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
-else:
-    sbert_model = None
-    print("Warning: ML libraries are not fully installed. Running in mock/compatibility mode.")
+sbert_model = None
+
+def get_sbert_model():
+    """Loads the SBERT model on first use instead of at startup, to reduce peak memory during boot."""
+    global sbert_model
+    if sbert_model is None and ML_LIBRARIES_AVAILABLE:
+        print("Loading SBERT Semantic Transformer model...")
+        sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
+    return sbert_model
 
 def extract_text_from_pdf(file_stream):
     """Helper function to extract clean text streams from an uploaded PDF file stream."""
@@ -140,14 +144,15 @@ def predict():
     if not raw_resumes:
         return "Could not extract text from any of the uploaded files. Please check your PDF formats.", 400
 
-    sbert_scores = []
+sbert_scores = []
     doc2vec_scores = []
 
     # 2. Compute Dual Model Similarity Arrays
-    if ML_LIBRARIES_AVAILABLE and sbert_model is not None:
+    active_sbert_model = get_sbert_model()
+    if ML_LIBRARIES_AVAILABLE and active_sbert_model is not None:
         # SBERT Contextual Semantic Match
-        jd_embedding = sbert_model.encode(jd_text, convert_to_tensor=True)
-        resume_embeddings = sbert_model.encode(raw_resumes, convert_to_tensor=True)
+        jd_embedding = active_sbert_model.encode(jd_text, convert_to_tensor=True)
+        resume_embeddings = active_sbert_model.encode(raw_resumes, convert_to_tensor=True)
         
         cosine_results = util.cos_sim(jd_embedding, resume_embeddings)[0]
         for score in cosine_results:
